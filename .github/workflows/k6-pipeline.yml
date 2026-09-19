@@ -1,0 +1,22 @@
+name: k6 Load Test na Nuvem
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # Permite rodar a pipeline manualmente pelo botão no GitHub
+
+jobs:
+  k6-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Executar teste e exportar para Grafana Cloud
+        uses: grafana/k6-action@v0.3.1
+        with:
+          filename: index.js
+          flags: --out cloud
+        env:
+          K6_CLOUD_TOKEN: ${{ secrets.K6_CLOUD_TOKEN }}
