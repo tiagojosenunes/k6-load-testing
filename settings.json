@@ -1,9 +1,13 @@
 {
-    "stages":[
-        {"duration":"10s", "target": 100 },
-        {"duration":"10s", "target": 50 },
-        {"duration":"10s", "target": 40 },
-        {"duration":"10s", "target": 30 },
-        {"duration":"10s", "target": 20 }
-    ]
+  "stages": [
+    { "duration": "5s", "target": 5 },
+    { "duration": "10s", "target": 5 },
+    { "duration": "5s", "target": 0 }
+  ],
+  "thresholds": {
+    "http_req_duration": ["p(95)<1500"],
+    "http_req_failed": ["rate<0.05"],
+    "login_duration": ["p(95)<1500"],
+    "login_fail_rate": ["rate<0.05"]
+  }
 }
