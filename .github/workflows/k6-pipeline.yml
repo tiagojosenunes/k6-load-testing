@@ -8,16 +8,20 @@ on:
 
 jobs:
   k6-test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+
     steps:
       - name: Checkout do código
         uses: actions/checkout@v4
 
       - name: Instalar k6 no ambiente
         uses: grafana/setup-k6-action@v1
+        with:
+          browser: true
 
       - name: Executar teste e exportar para Grafana Cloud
-        run: k6 run --out cloud index.js
         env:
           K6_CLOUD_TOKEN: ${{ secrets.K6_CLOUD_TOKEN }}
           K6_BROWSER_HEADLESS: "true"
+          K6_BROWSER_ARGS: "no-sandbox"
+        run: k6 run --out cloud index.js
