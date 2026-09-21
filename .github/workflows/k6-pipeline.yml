@@ -20,3 +20,4 @@ jobs:
         run: k6 run --out cloud index.js
         env:
           K6_CLOUD_TOKEN: ${{ secrets.K6_CLOUD_TOKEN }}
+          K6_BROWSER_HEADLESS: "true"
