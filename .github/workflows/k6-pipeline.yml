@@ -13,9 +13,10 @@ jobs:
       - name: Checkout do código
         uses: actions/checkout@v4
 
+      - name: Instalar k6 no ambiente
+        uses: grafana/setup-k6-action@v1
+
       - name: Executar teste e exportar para Grafana Cloud
-        uses: grafana/k6-action@v0.3.1
-        with:
-          filename: index.js
-          flags: --out cloud
-          token: ${{ secrets.K6_CLOUD_TOKEN }}
+        run: k6 run --out cloud index.js
+        env:
+          K6_CLOUD_TOKEN: ${{ secrets.K6_CLOUD_TOKEN }}
