@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+
   workflow_dispatch:
 
 jobs:
@@ -22,6 +23,22 @@ jobs:
       - name: Executar teste e exportar para Grafana Cloud
         env:
           K6_CLOUD_TOKEN: ${{ secrets.K6_CLOUD_TOKEN }}
+
           K6_BROWSER_HEADLESS: "true"
+
           K6_BROWSER_ARGS: "no-sandbox"
-        run: k6 run --out cloud index.js
+
+          BASE_URL: "https://quickpizza.grafana.com"
+
+        run: |
+          k6 run --out cloud index.js
+
+      - name: Upload dos relatórios
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-test-report
+          path: |
+            summary.html
+            screenshot.png
+          if-no-files-found: warn

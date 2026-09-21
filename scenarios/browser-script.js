@@ -1,23 +1,12 @@
 import { browser } from 'k6/browser';
-import { sleep, fail } from 'k6';
-import { expect } from 'https://jslib.k6.io/k6-testing/0.5.0/index.js';
+import { check, fail } from 'k6';
 
-const BASE_URL = __ENV.BASE_URL || 'https://quickpizza.grafana.com';
+const BASE_URL =
+  __ENV.BASE_URL || 'https://quickpizza.grafana.com';
 
-// Configuração necessária para habilitar o k6/browser na execução isolada
-export const options = {
-  scenarios: {
-    ui: {
-      executor: 'shared-iterations',
-      vus: 1,
-      iterations: 1,
-      options: {
-        browser: {
-          type: 'chromium',
-        },
-      },
-    },
-  },
+const BROWSER_TAGS = {
+  test_type: 'browser',
+  feature: 'quickpizza-ui',
 };
 
 export default async function UIQuickPizza() {
@@ -25,18 +14,48 @@ export default async function UIQuickPizza() {
 
   try {
     await page.goto(BASE_URL);
-    await expect.soft(page.locator('h1')).toHaveText('Looking to break out of your pizza routine?');
 
-    await page.locator('//button[. = "Pizza, Please!"]').click();
+    const title = await page.locator('h1').textContent();
+
+    const titleCheck = check(
+      title,
+      {
+        'pizza page loaded correctly': (value) =>
+          value ===
+          'Looking to break out of your pizza routine?',
+      },
+      BROWSER_TAGS
+    );
+
+    if (!titleCheck) {
+      fail('Pizza page title is invalid');
+    }
+
+    await page
+      .locator('//button[. = "Pizza, Please!"]')
+      .click();
+
     await page.waitForTimeout(500);
 
-    await page.screenshot({ path: 'screenshot.png' });
-    await expect.soft(page.locator('div#recommendations')).not.toHaveText('');
+    const recommendations = await page
+      .locator('#recommendations')
+      .textContent();
+
+    check(
+      recommendations,
+      {
+        'recommendations are displayed': (value) =>
+          Boolean(value && value.trim().length > 0),
+      },
+      BROWSER_TAGS
+    );
+
+    await page.screenshot({
+      path: 'screenshot.png',
+    });
   } catch (error) {
     fail(`Browser iteration failed: ${error.message}`);
   } finally {
     await page.close();
   }
-
-  sleep(1);
 }
