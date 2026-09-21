@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch: # Permite rodar a pipeline manualmente pelo botão no GitHub
+  workflow_dispatch:
 
 jobs:
   k6-test:
@@ -13,10 +13,20 @@ jobs:
       - name: Checkout do código
         uses: actions/checkout@v4
 
+      - name: Validar se a Secret existe
+        run: |
+          if [ -z "${{ secrets.K6_CLOUD_TOKEN }}" ]; then
+            echo "ERRO: A secret K6_CLOUD_TOKEN não foi encontrada ou está vazia!"
+            exit 1
+          else
+            echo "A secret K6_CLOUD_TOKEN foi carregada com sucesso."
+          fi
+
       - name: Executar teste e exportar para Grafana Cloud
         uses: grafana/k6-action@v0.3.1
         with:
           filename: index.js
           flags: --out cloud
+          token: ${{ secrets.K6_CLOUD_TOKEN }}
         env:
           K6_CLOUD_TOKEN: ${{ secrets.K6_CLOUD_TOKEN }}
